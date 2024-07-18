@@ -4,10 +4,10 @@
  :builds       {:instaparsejs
                 {:target    :esm
                  :modules   {:main {:exports {
-                    :parse instaparsejs/parse
-                    :parses instaparsejs/parses
-                    :span instaparsejs/span
-                    :spans instaparsejs/spans
+                    :parser_all instaparsejs/parser_all
+                    :parser instaparsejs/parser
+                    :parser_pos instaparsejs/parser_pos
+                    :parser_all_pos instaparsejs/parser_all_pos
                 }}}
                  :output-dir "dist"
                 }}}
