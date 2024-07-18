@@ -1,14 +1,61 @@
-import { parser } from "../dist/main.js";
+import { parses, spans } from "../dist/main.js";
 
-const tt1 = `aaaaabbbaaaabb`;
-const gg1 = `S = AB*
-AB = A B
-A = 'a'+
-B = 'b'+`;
-console.log(parser(gg1)(tt1));
+// const tt1 = `aaaaabbbaaaabb`;
+// const gg1 = `S = AB*
+// AB = A B
+// A = 'a'+
+// B = 'b'+`;
+// console.log(parses(gg1)(tt1)[0]);
 
-const gg2 = `S = ('a'+ 'b'+)*`;
-console.log(parser(gg2)(tt1));
+// const gg2 = `S = ('a'+ 'b'+)*`;
+// console.log(parses(gg2)(tt1));
+
+// const gg3 = `S = AB*
+// <AB> = A B
+// <A> = 'a'+
+// <B> = 'b'+`;
+// console.log(parses(gg3)(tt1));
+
+// const gg4 = `S = AB*
+// AB = A B
+// A = #'a+'
+// B = #'b+'`;
+// console.log(parses(gg4)(tt1));
+
+// const gg5 = `sentence = token (<whitespace> token)*
+// <token> = word | number
+// whitespace = #'\\s+'
+// word = #'[a-zA-Z]+'
+// number = #'[0-9]+'`;
+
+// console.log(parses(gg5)("abc 123 def"));
+
+// const gg5 = `sentence = token (<whitespace> token)*
+// <token> = word | number
+// whitespace = #'\\s+'
+// word = #'[a-zA-Z]+'
+// number = #'[0-9]+'`;
+
+// console.log(parses(gg5)("abc 123 def"));
+
+const texp = "a|b&c"
+// const gexp = `E = E "&" E | E "|" E | id
+// <id> = "a"|"b"|"c"`
+// console.log(JSON.stringify(parses(gexp)(texp), null, 2));
+
+// const gexp1 = `E = E "&" E / E "|" E / id
+// <id> = "a"|"b"|"c"`
+// console.log(JSON.stringify(parses(gexp1)(texp), null, 2));
+
+const gexp2 = `EXP = E
+<E> = <"("> E <")"> / or / and / id
+and = E <"&"> E
+or = E <"|"> E
+<id> = "a"|"b"|"c"`
+// console.log(JSON.stringify(parses(gexp2)(texp), null, 2));
+// console.log(JSON.stringify(parses(gexp2)("a&b&c"), null, 2));
+console.log(JSON.stringify(spans(gexp2)("a&b&c"), null, 2));
+// console.log(JSON.stringify(parses(gexp2)("a&(b&c)"), null, 2));
 
 // const ggcs = `
 // S = &(A !'b') 'a'* B !''
@@ -27,24 +74,24 @@ console.log(parser(gg2)(tt1));
 // const tcs6 = 'aabcc'
 // const tcs7 = 'aabbbcc'
 // const tcs8 = ''
-// console.log(parser(ggcs)(tcs1));
-// console.log(parser(ggcs)(tcs2));
-// console.log(parser(ggcs)(tcs3));
-// console.log(parser(ggcs)(tcs4));
-// console.log(parser(ggcs)(tcs5));
-// console.log(parser(ggcs)(tcs6));
-// console.log(parser(ggcs)(tcs7));
-// console.log(parser(ggcs)(tcs8));
+// console.log(parses(ggcs)(tcs1));
+// console.log(parses(ggcs)(tcs2));
+// console.log(parses(ggcs)(tcs3));
+// console.log(parses(ggcs)(tcs4));
+// console.log(parses(ggcs)(tcs5));
+// console.log(parses(ggcs)(tcs6));
+// console.log(parses(ggcs)(tcs7));
+// console.log(parses(ggcs)(tcs8));
 
 // const g1 = `S = 'a'*`;
 // const t1 = `aaaaa`;
-// console.log(parser(g1)(t1));
+// console.log(parses(g1)(t1));
 
 // const g2 = `S = 'a' S | ''`;
-// console.log(parser(g2)(t1));
+// console.log(parses(g2)(t1));
 
 // const g3 = `S = S 'a' | ''`;
-// console.log(parser(g3)(t1));
+// console.log(parses(g3)(t1));
 
 // const gj = `
 // A1 = (&(A1 A3) (A2 A2)) | 'a'
@@ -62,12 +109,12 @@ console.log(parser(gg2)(tt1));
 // const tj8 = `aaaaaaaa`;
 // const tj9 = `aaaaaaaa`;
 
-// console.log(parser(gj)(tj1));
-// console.log(parser(gj)(tj2));
-// console.log(parser(gj)(tj3));
-// console.log(parser(gj)(tj4));
-// console.log(parser(gj)(tj5));
-// console.log(parser(gj)(tj6));
-// console.log(parser(gj)(tj7));
-// console.log(parser(gj)(tj8));
-// console.log(parser(gj)(tj9));
+// console.log(parses(gj)(tj1));
+// console.log(parses(gj)(tj2));
+// console.log(parses(gj)(tj3));
+// console.log(parses(gj)(tj4));
+// console.log(parses(gj)(tj5));
+// console.log(parses(gj)(tj6));
+// console.log(parses(gj)(tj7));
+// console.log(parses(gj)(tj8));
+// console.log(parses(gj)(tj9));

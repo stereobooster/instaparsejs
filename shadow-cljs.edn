@@ -3,6 +3,11 @@
  :dependencies [[instaparse "1.5.0"]]
  :builds       {:instaparsejs
                 {:target    :esm
-                 :modules   {:main {:exports {:parser instaparsejs/parser}}}
+                 :modules   {:main {:exports {
+                    :parse instaparsejs/parse
+                    :parses instaparsejs/parses
+                    :span instaparsejs/span
+                    :spans instaparsejs/spans
+                }}}
                  :output-dir "dist"
                 }}}
