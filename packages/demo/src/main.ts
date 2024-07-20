@@ -21,7 +21,6 @@ const svgoConfig: SvgoConfig = {
   ],
 };
 function renderDot(dot: string) {
-  console.log(dot);
   return optimize(graphviz.dot(dot), svgoConfig).data;
 }
 
