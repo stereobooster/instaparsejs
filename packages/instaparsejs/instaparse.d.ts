@@ -1,4 +1,4 @@
-declare module 'instaparsejs' {
+declare module 'instaparse' {
 
   export type Tree =
     | { tag: string; pos: [number, number]; children: Tree[] }

@@ -1,5 +1,5 @@
 import "./index.css";
-import { parserPosAll, type Tree } from "instaparsejs";
+import { parserPosAll, type Tree } from "instaparse";
 import { Graphviz } from "@hpcc-js/wasm";
 import { optimize, type Config as SvgoConfig } from "svgo";
 

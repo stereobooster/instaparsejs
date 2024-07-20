@@ -26,9 +26,9 @@ importers:
       '@tailwindcss/forms':
         specifier: ^0.5.7
         version: 0.5.7(tailwindcss@3.4.6)
-      instaparsejs:
-        specifier: workspace:*
-        version: link:../instaparsejs
+      instaparse:
+        specifier: 0.0.2
+        version: 0.0.2
       svgo:
         specifier: ^3.3.2
         version: 3.3.2
@@ -787,6 +787,9 @@ packages:
 
   inherits@2.0.4:
     resolution: {integrity: sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==}
+
+  instaparse@0.0.2:
+    resolution: {integrity: sha512-xkZADKaNGIcOWpW15v+xX6Wj6+4uREFSWDE2u5Q/FNmkPN+l+IcO7ZKW4NF3/g1zscBRYyJdE85mV9Fy51YDoA==}
 
   is-binary-path@2.1.0:
     resolution: {integrity: sha512-ZMERYes6pDydyuGidse7OsHxtbI7WVeUEozgR/g7rd0xUimYNlvZRE/K2MgZTjWy725IfelLeVcEM97mmtRGXw==}
@@ -2220,6 +2223,8 @@ snapshots:
   inherits@2.0.3: {}
 
   inherits@2.0.4: {}
+
+  instaparse@0.0.2: {}
 
   is-binary-path@2.1.0:
     dependencies:
