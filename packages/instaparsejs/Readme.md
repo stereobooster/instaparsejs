@@ -4,6 +4,8 @@ What if context-free grammars were as easy to use as regular expressions?
 
 [instaparse](https://github.com/Engelberg/instaparse) compiled to JavaScript (ESM).
 
+**Not production ready. API can change.**
+
 ## Usage
 
 ```sh
@@ -24,7 +26,9 @@ console.log(parser(grammar)(text));
 
 ## TODO
 
-- [ ] publish `instaparsejs` package as well
+- [ ] add tests
+- [ ] add benchmark
+- [ ] publish `instaparsejs` package as well?
 - [ ] single node with value case
 - [ ] how to show error if parsing failed?
 - [ ] expose `insta/add-line-and-column-info-to-metadata`
