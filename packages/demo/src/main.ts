@@ -1,11 +1,113 @@
 import "./index.css";
-
 // @ts-expect-error TODO add TS signature
 import { parser_all_pos } from "instaparsejs";
+import { Graphviz } from "@hpcc-js/wasm";
+import { optimize, type Config as SvgoConfig } from "svgo";
 
-const gexp2 = `EXP = E
+import "@beoe/pan-zoom/css/PanZoomUi.css";
+import { PanZoomUi } from "@beoe/pan-zoom";
+
+const graphviz = await Graphviz.load();
+const svgoConfig: SvgoConfig = {
+  plugins: [
+    {
+      name: "preset-default",
+      params: {
+        overrides: {
+          // we need viewbox for inline SVGs
+          removeViewBox: false,
+        },
+      },
+    },
+  ],
+};
+function renderDot(dot: string) {
+  return optimize(graphviz.dot(dot), svgoConfig).data;
+}
+
+type Tree =
+  | { tag: string; pos: [number, number]; children: Tree[] }
+  | { value: string };
+
+function treeToDot(trees: Tree[]) {
+  const nodes = new Map<string, string>();
+  const edges: Array<[string, string]> = [];
+
+  function rec(tree: Tree, prefix: number, parentId?: string, n?: number) {
+    if ("value" in tree) {
+      if (parentId !== undefined && n !== undefined) {
+        const id = `${parentId}_${n}`;
+        nodes.set(id, tree.value);
+        edges.push([parentId, id]);
+      }
+    } else {
+      const id = `${tree.tag}_${prefix}_${tree.pos[0]}_${tree.pos[1]}`;
+      if (parentId !== undefined) edges.push([parentId, id]);
+      if (tree.children.length === 1 && "value" in tree.children[0]) {
+        nodes.set(
+          id,
+          `${tree.children[0].value} (${tree.pos[0]}, ${tree.pos[1]})`
+        );
+      } else {
+        nodes.set(id, `${tree.tag} (${tree.pos[0]}, ${tree.pos[1]})`);
+        tree.children.forEach((t, i) => rec(t, prefix, id, i));
+      }
+    }
+  }
+
+  trees.forEach((tree, i) => rec(tree, i));
+
+  return `
+digraph AST {
+  ${Array.from(nodes.entries())
+    .map(
+      ([id, label]) =>
+        `${id}[label="${label}" shape=rect style=rounded height=0.3]`
+    )
+    .join("\n")}
+  ${edges.map(([id1, id2]) => `${id1} -> ${id2}`).join("\n")}
+}`;
+}
+
+const result = document.querySelector("#result")!;
+const grammar = document.querySelector("#grammar")! as HTMLTextAreaElement;
+const text = document.querySelector("#text")! as HTMLTextAreaElement;
+const error = document.querySelector("#error")!;
+const errorMessage = document.querySelector("#errorMessage")!;
+
+grammar.textContent = `EXP = E
 <E> = <"("> E <")"> / or / and / id
 and = E <"&"> E
 or = E <"|"> E
-<id> = "a"|"b"|"c"`
-console.log(JSON.stringify(parser_all_pos(gexp2)("a&b&c"), null, 2));
+id = "a"|"b"|"c"`;
+text.textContent = "a&b&c";
+
+let panZoomInstance: PanZoomUi;
+
+function process() {
+  const grammarValue = grammar.value;
+  const textValue = text.value;
+  try {
+    error.classList.add("hidden");
+    const trees = parser_all_pos(grammarValue)(textValue);
+    if (trees.length === 0) {
+      // TODO: why it doesn't show error?
+      error.classList.remove("hidden");
+      errorMessage.textContent = "Can't parse";
+    } else {
+      result.innerHTML = renderDot(treeToDot(trees));
+      const element = result.firstElementChild;
+      if (panZoomInstance) panZoomInstance.off();
+      // @ts-expect-error
+      panZoomInstance = new PanZoomUi({ element, container: result });
+      panZoomInstance.on();
+    }
+  } catch (e) {
+    error.classList.remove("hidden");
+    errorMessage.textContent = e as string;
+  }
+}
+
+process();
+grammar.addEventListener("keyup", () => process());
+text.addEventListener("keyup", () => process());

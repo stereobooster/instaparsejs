@@ -4,12 +4,48 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Demo instaparse</title>
+    <title>Instaparse playground</title>
   </head>
   <body>
-    <article class="prose lg:prose-xl m-auto">
-      <h1>Demo</h1>
-    </article>
+    <div class="grid grid-cols-2 gap-4 m-4">
+      <div>
+        <article class="prose mb-4">
+          <h1>Instaparse playground</h1>
+          <p><a href="https://github.com/Engelberg/instaparse">Instaparse</a> compiled to JavaScript (ESM)</p>
+        </article>
+        <div class="mb-4">
+          <label for="grammar" class="block text-sm font-medium text-gray-700">
+            Grammar (EBNF)
+          </label>
+          <textarea
+            id="grammar"
+            class="mt-2 w-full rounded-lg border-gray-200 align-top shadow-sm sm:text-sm"
+            rows="9"
+          ></textarea>
+        </div>
+        <div class="mb-4">
+          <label for="text" class="block text-sm font-medium text-gray-700">
+            Text
+          </label>
+          <textarea
+            id="text"
+            class="mt-2 w-full rounded-lg border-gray-200 align-top shadow-sm sm:text-sm"
+            rows="9"
+          ></textarea>
+        </div>
+        <div
+          role="alert"
+          id="error"
+          class="rounded border-s-4 border-red-500 bg-red-50 p-4 hidden"
+        >
+          <strong class="block font-medium text-red-800">Error</strong>
+          <p class="mt-2 text-sm text-red-700" id="errorMessage"></p>
+        </div>
+      </div>
+      <div>
+        <figure id="result" class="beoe"></figure>
+      </div>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
