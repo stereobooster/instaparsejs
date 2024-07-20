@@ -6,3 +6,8 @@
 
 - [instaparsejs](/packages/instaparsejs/) - main package
 - [demo](/packages/demo/) - demo
+
+## TODO
+
+- [ ] publish package to npm
+- [ ] publish playground to netlify

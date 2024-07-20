@@ -24,8 +24,8 @@ console.log(parser(grammar)(text));
 
 ## TODO
 
-- [ ] implement analog of `insta/visualize`
-- [ ] expose `insta/span`
+- [ ] single node with value case
+- [ ] how to show error if parsing failed?
 - [ ] expose `insta/add-line-and-column-info-to-metadata`
 - [ ] expose options for `insta/parser`
   ```

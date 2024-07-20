@@ -18,6 +18,6 @@
   (let [p (insta/parser grammar)] 
     (fn [text] (clj->js (spans_int (insta/parse p text))))))
 
-(defn parser_all_pos [grammar]
+(defn parser_pos_all [grammar]
   (let [p (insta/parser grammar)] 
     (fn [text] (clj->js (map spans_int (insta/parses p text))))))

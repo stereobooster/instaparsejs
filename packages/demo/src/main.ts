@@ -1,6 +1,5 @@
 import "./index.css";
-// @ts-expect-error TODO add TS signature
-import { parser_all_pos } from "instaparsejs";
+import { parserPosAll, type Tree } from "instaparsejs";
 import { Graphviz } from "@hpcc-js/wasm";
 import { optimize, type Config as SvgoConfig } from "svgo";
 
@@ -24,10 +23,6 @@ const svgoConfig: SvgoConfig = {
 function renderDot(dot: string) {
   return optimize(graphviz.dot(dot), svgoConfig).data;
 }
-
-type Tree =
-  | { tag: string; pos: [number, number]; children: Tree[] }
-  | { value: string };
 
 function treeToDot(trees: Tree[]) {
   const nodes = new Map<string, string>();
@@ -65,7 +60,7 @@ digraph AST {
         `${id}[label="${label}" shape=rect style=rounded height=0.3]`
     )
     .join("\n")}
-  ${edges.map(([id1, id2]) => `${id1} -> ${id2}`).join("\n")}
+  ${edges.map((p) => p.join(` -> `)).join("\n")}
 }`;
 }
 
@@ -74,6 +69,8 @@ const grammar = document.querySelector("#grammar")! as HTMLTextAreaElement;
 const text = document.querySelector("#text")! as HTMLTextAreaElement;
 const error = document.querySelector("#error")!;
 const errorMessage = document.querySelector("#errorMessage")!;
+const allTrees = document.querySelector("#allTrees")! as HTMLInputElement;
+const allTreesLabel = document.querySelector("#allTreesLabel")!;
 
 grammar.textContent = `EXP = E
 <E> = <"("> E <")"> / or / and / id
@@ -87,15 +84,21 @@ let panZoomInstance: PanZoomUi;
 function process() {
   const grammarValue = grammar.value;
   const textValue = text.value;
+  const showAlltrees = allTrees.checked;
   try {
     error.classList.add("hidden");
-    const trees = parser_all_pos(grammarValue)(textValue);
+    allTreesLabel.textContent = `Show all trees`;
+
+    const trees = parserPosAll(grammarValue)(textValue);
+    // TODO: why it doesn't show error?
     if (trees.length === 0) {
-      // TODO: why it doesn't show error?
       error.classList.remove("hidden");
       errorMessage.textContent = "Can't parse";
     } else {
-      result.innerHTML = renderDot(treeToDot(trees));
+      result.innerHTML = renderDot(
+        treeToDot(showAlltrees ? trees : [trees[0]])
+      );
+      allTreesLabel.textContent = `Show all trees (${trees.length})`;
       const element = result.firstElementChild;
       if (panZoomInstance) panZoomInstance.off();
       // @ts-expect-error
@@ -104,10 +107,15 @@ function process() {
     }
   } catch (e) {
     error.classList.remove("hidden");
-    errorMessage.textContent = e as string;
+    if (typeof e === "string") {
+      errorMessage.textContent = e;
+    } else {
+      errorMessage.textContent = (e as Error).message;
+    }
   }
 }
 
 process();
 grammar.addEventListener("keyup", () => process());
 text.addEventListener("keyup", () => process());
+allTrees.addEventListener("change", () => process());

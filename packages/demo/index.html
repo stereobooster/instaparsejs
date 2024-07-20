@@ -11,8 +11,49 @@
       <div>
         <article class="prose mb-4">
           <h1>Instaparse playground</h1>
-          <p><a href="https://github.com/Engelberg/instaparse">Instaparse</a> compiled to JavaScript (ESM)</p>
+          <p>
+            <a href="https://github.com/Engelberg/instaparse">Instaparse</a>
+            compiled to JavaScript (ESM)
+          </p>
         </article>
+
+        <div class="mb-1 space-y-2">
+          <label class="flex cursor-pointer items-start gap-4">
+            <div class="flex items-center">
+              &#8203;
+              <input
+                type="checkbox"
+                class="size-4 rounded border-gray-300"
+                id="allTrees"
+              />
+            </div>
+
+            <div>
+              <strong class="font-medium text-gray-900" id="allTreesLabel"
+                >Show all trees</strong
+              >
+            </div>
+          </label>
+        </div>
+
+        <div class="mb-4 space-y-2">
+          <label class="flex cursor-pointer items-start gap-4">
+            <div class="flex items-center">
+              &#8203;
+              <input
+                type="checkbox"
+                class="size-4 rounded border-gray-300"
+                id="sppf"
+                disabled
+              />
+            </div>
+
+            <div>
+              <strong class="font-medium text-gray-900">SPPF</strong>
+            </div>
+          </label>
+        </div>
+
         <div class="mb-4">
           <label for="grammar" class="block text-sm font-medium text-gray-700">
             Grammar (EBNF)
@@ -20,7 +61,7 @@
           <textarea
             id="grammar"
             class="mt-2 w-full rounded-lg border-gray-200 align-top shadow-sm sm:text-sm"
-            rows="9"
+            rows="7"
           ></textarea>
         </div>
         <div class="mb-4">
@@ -30,7 +71,7 @@
           <textarea
             id="text"
             class="mt-2 w-full rounded-lg border-gray-200 align-top shadow-sm sm:text-sm"
-            rows="9"
+            rows="7"
           ></textarea>
         </div>
         <div
