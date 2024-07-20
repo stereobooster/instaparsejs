@@ -1,7 +1,7 @@
 {
   "name": "instaparse",
   "description": "What if context-free grammars were as easy to use as regular expressions?. Clojure instaparse compiled to ESM",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/stereobooster/instaparsejs.git",

@@ -21,6 +21,7 @@ const svgoConfig: SvgoConfig = {
   ],
 };
 function renderDot(dot: string) {
+  console.log(dot);
   return optimize(graphviz.dot(dot), svgoConfig).data;
 }
 
@@ -64,12 +65,11 @@ function treeToSppfDot(trees: Tree[]) {
       if (parentId !== undefined) {
         if (!edges.has(`${parentId}->${id}`)) {
           const packedId = `${parentId}_${prefix}`;
+          edges.set(`${parentId}->${id}`, ``);
           if (!edges.has(`${parentId}->${packedId}`)) {
-            edges.set(`${parentId}->${id}`, `${parentId}->${packedId}->${id}`);
-            edges.set(`${parentId}->${packedId}`, ``);
-          } else {
-            edges.set(`${packedId}->${id}`, `${packedId}->${id}`);
+            edges.set(`${parentId}->${packedId}`, `${parentId}->${packedId}`);
           }
+          edges.set(`${packedId}->${id}`, `${packedId}->${id}`);
           nodes.set(packedId, {
             label: ``,
             type: "packed",

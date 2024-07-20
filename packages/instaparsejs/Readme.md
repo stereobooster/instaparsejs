@@ -7,11 +7,11 @@ What if context-free grammars were as easy to use as regular expressions?
 ## Usage
 
 ```sh
-npm add instaparsejs
+npm add instaparse
 ```
 
 ```js
-import { parser } from "instaparsejs";
+import { parser } from "instaparse";
 
 const grammar = `S = AB*
 AB = A B
@@ -24,6 +24,7 @@ console.log(parser(grammar)(text));
 
 ## TODO
 
+- [ ] publish `instaparsejs` package as well
 - [ ] single node with value case
 - [ ] how to show error if parsing failed?
 - [ ] expose `insta/add-line-and-column-info-to-metadata`
