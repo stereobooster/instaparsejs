@@ -6,6 +6,6 @@ const parserPosAll = memoizeOne((grammar: string) => {
   return memoizeOne((text: string) => parser(text));
 });
 
-export function parse(grammar: string, text: string) {
+export function parseWorker(grammar: string, text: string) {
   return parserPosAll(grammar)(text);
 }

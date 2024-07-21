@@ -3,14 +3,7 @@ import "@beoe/pan-zoom/css/PanZoomUi.css";
 import { PanZoomUi } from "@beoe/pan-zoom";
 import { renderDot } from "./renderDot";
 import { treeToDot, treeToSppfDot } from "./treeToDot";
-import { parse } from "./parserClient";
-// import { parserPosAll as _parserPosAll } from "instaparse";
-// import { memoizeOne } from "./memoizeOne";
-
-// const parserPosAll = memoizeOne((grammar: string) => {
-//   const parser = _parserPosAll(grammar);
-//   return memoizeOne((text: string) => parser(text));
-// });
+import { parseClient } from "./parseClient";
 
 const result = document.querySelector("#result")!;
 const grammar = document.querySelector(
@@ -58,7 +51,7 @@ monaco.languages.setMonarchTokensProvider("bnf", bnfLanguage);
 async function validate(model: monaco.editor.ITextModel) {
   const markers = [];
   try {
-    await parse(model.getValue(), '');
+    await parseClient(model.getValue(), '');
   } catch (e) {
     if (typeof e == "string") {
       const arr = e.split("\n");
@@ -121,7 +114,7 @@ async function process(valid = true) {
       allTreesLabel.textContent = `Show all trees`;
 
       // const trees = parserPosAll(grammarValue)(textValue);
-      const trees = await parse(grammarValue, textValue);
+      const trees = await parseClient(grammarValue, textValue);
       highlight.innerHTML =
         `<option value="">None</option>` +
         Array.from(Array(trees.length))
