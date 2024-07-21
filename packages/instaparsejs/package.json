@@ -14,7 +14,10 @@
     "gll"
   ],
   "type": "module",
-  "files": ["./dist/main.js", "./instaparse.d.ts"],
+  "files": [
+    "./dist/main.js",
+    "./instaparse.d.ts"
+  ],
   "exports": {
     "default": "./dist/main.js",
     "types": "./instaparse.d.ts"

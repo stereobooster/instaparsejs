@@ -151,7 +151,9 @@ digraph AST {
 }
 
 const result = document.querySelector("#result")!;
-const grammar = document.querySelector("#grammar")! as HTMLTextAreaElement;
+const grammar = document.querySelector(
+  "#grammar"
+) as HTMLTextAreaElement | null;
 const text = document.querySelector("#text")! as HTMLTextAreaElement;
 const error = document.querySelector("#error")!;
 const errorMessage = document.querySelector("#errorMessage")!;
@@ -159,17 +161,131 @@ const allTrees = document.querySelector("#allTrees")! as HTMLInputElement;
 const allTreesLabel = document.querySelector("#allTreesLabel")!;
 const sppf = document.querySelector("#sppf")! as HTMLInputElement;
 
-grammar.textContent = `EXP = E
+let panZoomInstance: PanZoomUi;
+
+const value = `EXP = E
 <E> = <"("> E <")"> / or / and / id
 and = E <"&"> E
 or = E <"|"> E
 id = "a"|"b"|"c"`;
+if (grammar) grammar.textContent = value;
 text.textContent = "a&b&c";
 
-let panZoomInstance: PanZoomUi;
+import * as monaco from "monaco-editor";
+monaco.languages.register({ id: "bnf" });
+
+function validate(model: monaco.editor.ITextModel) {
+  const markers = [];
+  try {
+    parserPosAll(model.getValue());
+  } catch (e) {
+    if (typeof e == "string") {
+      const arr = e.split("\n");
+      if (arr.length > 4) {
+        arr.shift();
+        const pos = arr.shift();
+        arr.shift();
+        arr.shift();
+
+        const p = pos?.match(/line (\d+), column (\d+)/);
+        const line = p ? parseFloat(p[1]) : 1;
+        const column = p ? parseFloat(p[2]) : 1;
+
+        markers.push({
+          message: arr.join("\n"),
+          severity: monaco.MarkerSeverity.Error,
+          startLineNumber: line,
+          startColumn: column,
+          endLineNumber: line,
+          endColumn: column,
+        });
+      } else {
+        markers.push({
+          message: arr.join("\n"),
+          severity: monaco.MarkerSeverity.Error,
+          startLineNumber: 1,
+          startColumn: 1,
+          endLineNumber: 1,
+          endColumn: 1,
+        });
+      }
+    }
+  }
+
+  monaco.editor.setModelMarkers(model, "owner", markers);
+  return markers.length === 0;
+}
+
+const uri = monaco.Uri.parse("inmemory://test");
+const model = monaco.editor.createModel(value, "bnf", uri);
+
+// https://microsoft.github.io/monaco-editor/monarch.html
+// https://microsoft.github.io/monaco-editor/playground.html?source=v0.50.0#example-extending-language-services-model-markers-example
+// https://github.com/microsoft/monaco-editor/tree/main/src/basic-languages
+// https://github.com/Engelberg/instaparse?tab=readme-ov-file#notation
+monaco.languages.setMonarchTokensProvider("bnf", {
+  operators: ["*", "?", "=", ":", ":=", "::=", "|"],
+
+  // we include these common regular expressions
+  symbols: /[=><!~?:&|+\-*\/\^%]+/,
+
+  // C# style strings
+  escapes:
+    /\\(?:[abfnrtv\\"']|x[0-9A-Fa-f]{1,4}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/,
+
+  // The main tokenizer for our languages
+  tokenizer: {
+    root: [
+      // identifiers and keywords
+      [/[a-zA-Z_$][\w$]*/, "variable"],
+
+      // whitespace
+      { include: "@whitespace" },
+
+      // delimiters and operators
+      [/;/, "delimiter"],
+      [/[{}()\[\]<>]/, "@brackets"],
+      [/@symbols/, { cases: { "@operators": "operator", "@default": "" } }],
+
+      // strings
+      [/"([^"\\]|\\.)*$/, "string.invalid"], // non-teminated string
+      [/"/, { token: "string.quote", bracket: "@open", next: "@string" }],
+
+      // characters
+      [/'[^\\']'/, "string"],
+      [/(')(@escapes)(')/, ["string", "string.escape", "string"]],
+      [/'/, "string.invalid"],
+    ],
+
+    comment: [
+      [/[^()*]+/, "comment"],
+      [/\(\*/, "comment", "@push"], // nested comment
+      [/\*\)/, "comment", "@pop"],
+      [/[()*]/, "comment"],
+    ],
+
+    string: [
+      [/[^\\"]+/, "string"],
+      [/@escapes/, "string.escape"],
+      [/\\./, "string.escape.invalid"],
+      [/"/, { token: "string.quote", bracket: "@close", next: "@pop" }],
+    ],
+
+    whitespace: [
+      [/[ \t\r\n]+/, "white"],
+      [/\(\*/, "comment", "@comment"],
+    ],
+  },
+});
+
+const editor = monaco.editor.create(document.getElementById("editor")!, {
+  language: "bnf",
+  minimap: { enabled: false },
+  model,
+});
 
 function process() {
-  const grammarValue = grammar.value;
+  const grammarValue = grammar?.value || model.getValue();
   const textValue = text.value;
   const showSppf = sppf.checked;
   const showAlltrees = allTrees.checked;
@@ -206,8 +322,13 @@ function process() {
   }
 }
 
-process();
-grammar.addEventListener("keyup", () => process());
+if (validate(model)) process();
+editor.onDidChangeModelContent(() => {
+  if (validate(model)) process();
+});
+
+// process();
+grammar?.addEventListener("keyup", () => process());
 text.addEventListener("keyup", () => process());
 allTrees.addEventListener("change", () => process());
 sppf.addEventListener("change", () => process());
