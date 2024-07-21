@@ -163,13 +163,19 @@ const sppf = document.querySelector("#sppf")! as HTMLInputElement;
 
 let panZoomInstance: PanZoomUi;
 
-const value = `EXP = E
+const u = new URL(window.location.toString());
+const p = u.searchParams;
+const value =
+  p.get("g") ||
+  `EXP = E
 <E> = <"("> E <")"> / or / and / id
 and = E <"&"> E
 or = E <"|"> E
 id = "a"|"b"|"c"`;
 if (grammar) grammar.textContent = value;
-text.textContent = "a&b&c";
+text.textContent = p.get("t") || "a&b&c";
+allTrees.checked = Boolean(p.get("all"));
+sppf.checked = Boolean(p.get("sppf"));
 
 import * as monaco from "monaco-editor";
 monaco.languages.register({ id: "bnf" });
@@ -293,47 +299,55 @@ const editor = monaco.editor.create(document.getElementById("editor")!, {
   model,
 });
 
-function process() {
+function process(valid = true) {
   const grammarValue = grammar?.value || model.getValue();
   const textValue = text.value;
   const showSppf = sppf.checked;
   const showAlltrees = allTrees.checked;
 
-  try {
-    error.classList.add("hidden");
-    allTreesLabel.textContent = `Show all trees`;
+  if (valid) {
+    try {
+      error.classList.add("hidden");
+      allTreesLabel.textContent = `Show all trees`;
 
-    const trees = parserPosAll(grammarValue)(textValue);
-    // TODO: why it doesn't show error?
-    if (trees.length === 0) {
+      const trees = parserPosAll(grammarValue)(textValue);
+      // TODO: why it doesn't show error?
+      if (trees.length === 0) {
+        error.classList.remove("hidden");
+        errorMessage.textContent = "Can't parse";
+      } else {
+        result.innerHTML = renderDot(
+          showSppf
+            ? treeToSppfDot(showAlltrees ? trees : [trees[0]])
+            : treeToDot(showAlltrees ? trees : [trees[0]])
+        );
+        allTreesLabel.textContent = `Show all trees (${trees.length})`;
+        const element = result.firstElementChild;
+        if (panZoomInstance) panZoomInstance.off();
+        // @ts-expect-error
+        panZoomInstance = new PanZoomUi({ element, container: result });
+        panZoomInstance.on();
+      }
+    } catch (e) {
       error.classList.remove("hidden");
-      errorMessage.textContent = "Can't parse";
-    } else {
-      result.innerHTML = renderDot(
-        showSppf
-          ? treeToSppfDot(showAlltrees ? trees : [trees[0]])
-          : treeToDot(showAlltrees ? trees : [trees[0]])
-      );
-      allTreesLabel.textContent = `Show all trees (${trees.length})`;
-      const element = result.firstElementChild;
-      if (panZoomInstance) panZoomInstance.off();
-      // @ts-expect-error
-      panZoomInstance = new PanZoomUi({ element, container: result });
-      panZoomInstance.on();
-    }
-  } catch (e) {
-    error.classList.remove("hidden");
-    if (typeof e === "string") {
-      errorMessage.textContent = e;
-    } else {
-      errorMessage.textContent = (e as Error).message;
+      if (typeof e === "string") {
+        errorMessage.textContent = e;
+      } else {
+        errorMessage.textContent = (e as Error).message;
+      }
     }
   }
+
+  p.set("g", grammarValue);
+  p.set("t", textValue);
+  p.set("sppf", showSppf ? "1" : "");
+  p.set("all", showAlltrees ? "1" : "");
+  window.history.replaceState({}, "", u);
 }
 
-if (validate(model)) process();
+process(validate(model));
 editor.onDidChangeModelContent(() => {
-  if (validate(model)) process();
+  process(validate(model));
 });
 
 // process();

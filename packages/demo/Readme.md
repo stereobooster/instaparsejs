@@ -1,6 +1,6 @@
 # Playground
 
-- [ ] preserve grammar and text in URL
+- [x] preserve grammar and text in URL
 - [ ] add ability to select one tree to show or highlight
 - [ ] dark mode
 - [x] editor with EBNF highlighting
