@@ -8,3 +8,8 @@ body,
   min-height: 100% !important;
   height: 100%;
 }
+
+.beoe {
+  /* for vertical allignment */
+  display: flex;
+}

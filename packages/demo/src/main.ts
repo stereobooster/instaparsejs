@@ -40,23 +40,22 @@ function treeToSppfDot(trees: Tree[]) {
 
   function rec(tree: Tree, prefix: number, parentId?: string, n?: number) {
     if ("value" in tree) {
-      if (parentId !== undefined && n !== undefined) {
+      if (parentId !== undefined) {
         const id = `${parentId}_${n}`;
-        nodes.set(id, { label: tree.value, type: "symbol" });
 
         if (!edges.has(`${parentId}->${id}`)) {
           const packedId = `${parentId}_${prefix}`;
-          if (!edges.has(`${parentId}->${packedId}`)) {
-            edges.set(`${parentId}->${id}`, `${parentId}->${packedId}->${id}`);
-            edges.set(`${parentId}->${packedId}`, ``);
-          } else {
-            edges.set(`${packedId}->${id}`, `${packedId}->${id}`);
-          }
+          edges.set(`${parentId}->${id}`, ``);
+          if (!edges.has(`${parentId}->${packedId}`))
+            edges.set(`${parentId}->${packedId}`, `${parentId}->${packedId}`);
+          edges.set(`${packedId}->${id}`, `${packedId}->${id}`);
           nodes.set(packedId, {
             label: ``,
             type: "packed",
           });
         }
+
+        nodes.set(id, { label: tree.value, type: "symbol" });
       }
     } else {
       const id = `${tree.tag}_${tree.pos[0]}_${tree.pos[1]}`;
@@ -65,9 +64,8 @@ function treeToSppfDot(trees: Tree[]) {
         if (!edges.has(`${parentId}->${id}`)) {
           const packedId = `${parentId}_${prefix}`;
           edges.set(`${parentId}->${id}`, ``);
-          if (!edges.has(`${parentId}->${packedId}`)) {
+          if (!edges.has(`${parentId}->${packedId}`))
             edges.set(`${parentId}->${packedId}`, `${parentId}->${packedId}`);
-          }
           edges.set(`${packedId}->${id}`, `${packedId}->${id}`);
           nodes.set(packedId, {
             label: ``,

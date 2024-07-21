@@ -9,7 +9,7 @@
   <body>
     <div class="grid grid-cols-2 gap-4 m-4">
       <div class="prose">
-        <article class="mb-4">
+        <article>
           <h1>Instaparse playground</h1>
           <p>
             <a href="https://github.com/Engelberg/instaparse">Instaparse</a>
@@ -20,7 +20,29 @@
           </p>
         </article>
 
-        <div class="mb-1 space-y-2">
+        <div class="mb-4">
+          <label for="grammar" class="block text-sm font-medium text-gray-700">
+            Grammar (EBNF)
+          </label>
+          <textarea
+            id="grammar"
+            class="mt-2 w-full rounded-lg border-gray-200 align-top shadow-sm sm:text-sm"
+            rows="5"
+          ></textarea>
+        </div>
+
+        <div class="mb-4">
+          <label for="text" class="block text-sm font-medium text-gray-700">
+            Text
+          </label>
+          <textarea
+            id="text"
+            class="mt-2 w-full rounded-lg border-gray-200 align-top shadow-sm sm:text-sm"
+            rows="5"
+          ></textarea>
+        </div>
+
+        <div class="space-y-2">
           <label class="flex cursor-pointer items-start gap-4">
             <div class="flex items-center">
               &#8203;
@@ -39,7 +61,7 @@
           </label>
         </div>
 
-        <div class="mb-4 space-y-2">
+        <div class="space-y-2">
           <label class="flex cursor-pointer items-start gap-4">
             <div class="flex items-center">
               &#8203;
@@ -62,26 +84,6 @@
           </label>
         </div>
 
-        <div class="mb-4">
-          <label for="grammar" class="block text-sm font-medium text-gray-700">
-            Grammar (EBNF)
-          </label>
-          <textarea
-            id="grammar"
-            class="mt-2 w-full rounded-lg border-gray-200 align-top shadow-sm sm:text-sm"
-            rows="7"
-          ></textarea>
-        </div>
-        <div class="mb-4">
-          <label for="text" class="block text-sm font-medium text-gray-700">
-            Text
-          </label>
-          <textarea
-            id="text"
-            class="mt-2 w-full rounded-lg border-gray-200 align-top shadow-sm sm:text-sm"
-            rows="7"
-          ></textarea>
-        </div>
         <div
           role="alert"
           id="error"
