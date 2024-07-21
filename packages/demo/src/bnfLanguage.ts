@@ -4,7 +4,7 @@ import * as monaco from "monaco-editor";
 // https://microsoft.github.io/monaco-editor/playground.html?source=v0.50.0#example-extending-language-services-model-markers-example
 // https://github.com/microsoft/monaco-editor/tree/main/src/basic-languages
 // https://github.com/Engelberg/instaparse?tab=readme-ov-file#notation
-export const bnfLanguage: monaco.languages.IMonarchLanguage = {
+export const bnfLanguage: monaco.languages.IMonarchLanguage = {  
   keywords: ["ε", "eps", "EPSILON", "epsilon", "Epsilon"],
   operators: ["*", "?", "=", ":", ":=", "::=", "|", "!", "&", "/"],
 
@@ -33,7 +33,7 @@ export const bnfLanguage: monaco.languages.IMonarchLanguage = {
       { include: "@whitespace" },
 
       // delimiters and operators
-      [/[;.]/, "delimiter"],
+      [/[;\.]/, "delimiter"],
       [/[{}()\[\]<>]/, "@brackets"],
       [/@symbols/, { cases: { "@operators": "operator", "@default": "" } }],
 

@@ -10,7 +10,7 @@ type Node = {
   type: "symbol" | "packed" | "intermediate";
 };
 
-export function treeToSppfDot(trees: Tree[]) {
+export function treeToSppfDot(trees: Tree[], showRanges = false) {
   const nodes = new Map<string, Node>();
   const edges = new Map<string, string>();
 
@@ -52,13 +52,17 @@ export function treeToSppfDot(trees: Tree[]) {
 
       if (tree.children.length === 1 && "value" in tree.children[0]) {
         nodes.set(id, {
-          label: `${tree.children[0].value} (${tree.pos[0]}, ${tree.pos[1]})`,
+          label: `${tree.children[0].value}${
+            showRanges ? ` (${tree.pos[0]}, ${tree.pos[1]})` : ""
+          }`,
           type: "symbol",
           pos: tree.pos,
         });
       } else {
         nodes.set(id, {
-          label: `${tree.tag} (${tree.pos[0]}, ${tree.pos[1]})`,
+          label: `${tree.tag}${
+            showRanges ? ` (${tree.pos[0]}, ${tree.pos[1]})` : ""
+          }`,
           type: "intermediate",
           pos: tree.pos,
         });
@@ -86,7 +90,7 @@ export function treeToSppfDot(trees: Tree[]) {
   }`;
 }
 
-export function treeToDot(trees: Tree[]) {
+export function treeToDot(trees: Tree[], showRanges = false) {
   const nodes = new Map<string, string>();
   const edges: Array<[string, string]> = [];
 
@@ -103,10 +107,15 @@ export function treeToDot(trees: Tree[]) {
       if (tree.children.length === 1 && "value" in tree.children[0]) {
         nodes.set(
           id,
-          `${tree.children[0].value} (${tree.pos[0]}, ${tree.pos[1]})`
+          `${tree.children[0].value}${
+            showRanges ? ` (${tree.pos[0]}, ${tree.pos[1]})` : ""
+          }`
         );
       } else {
-        nodes.set(id, `${tree.tag} (${tree.pos[0]}, ${tree.pos[1]})`);
+        nodes.set(
+          id,
+          `${tree.tag}${showRanges ? ` (${tree.pos[0]}, ${tree.pos[1]})` : ""}`
+        );
         tree.children.forEach((t, i) => rec(t, prefix, id, i));
       }
     }

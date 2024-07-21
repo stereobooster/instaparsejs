@@ -15,6 +15,7 @@ const errorMessage = document.querySelector("#errorMessage")!;
 const allTrees = document.querySelector("#allTrees")! as HTMLInputElement;
 const allTreesLabel = document.querySelector("#allTreesLabel")!;
 const sppf = document.querySelector("#sppf")! as HTMLInputElement;
+const ranges = document.querySelector("#ranges")! as HTMLInputElement;
 
 let panZoomInstance: PanZoomUi;
 
@@ -23,14 +24,16 @@ const p = u.searchParams;
 const value =
   p.get("g") ||
   `EXP = E
-<E> = <"("> E <")"> / or / and / id
-and = E <"&"> E
-or = E <"|"> E
-id = "a"|"b"|"c"`;
+<E> = <"("> E <")"> / mul / (add | sub) / num
+mul = E <"*"> E
+add = E <"+"> E
+sub = E <"-"> E
+num = #"\\d+"`;
 if (grammar) grammar.textContent = value;
-text.textContent = p.get("t") || "a&b&c";
+text.textContent = p.get("t") || "1+2*3+4";
 allTrees.checked = Boolean(p.get("all"));
 sppf.checked = Boolean(p.get("sppf"));
+ranges.checked = Boolean(p.get("ranges"));
 
 import * as monaco from "monaco-editor";
 import { bnfLanguage } from "./bnfLanguage";
@@ -85,6 +88,8 @@ const editor = monaco.editor.create(document.getElementById("editor")!, {
   language: "bnf",
   minimap: { enabled: false },
   model,
+  bracketPairColorization: { enabled: true },
+  matchBrackets: "always",
 });
 
 function process(valid = true) {
@@ -92,6 +97,7 @@ function process(valid = true) {
   const textValue = text.value;
   const showSppf = sppf.checked;
   const showAlltrees = allTrees.checked;
+  const showRanges = ranges.checked;
 
   if (valid) {
     try {
@@ -106,8 +112,8 @@ function process(valid = true) {
       } else {
         result.innerHTML = renderDot(
           showSppf
-            ? treeToSppfDot(showAlltrees ? trees : [trees[0]])
-            : treeToDot(showAlltrees ? trees : [trees[0]])
+            ? treeToSppfDot(showAlltrees ? trees : [trees[0]], showRanges)
+            : treeToDot(showAlltrees ? trees : [trees[0]], showRanges)
         );
         allTreesLabel.textContent = `Show all trees (${trees.length})`;
         const element = result.firstElementChild;
@@ -130,6 +136,7 @@ function process(valid = true) {
   p.set("t", textValue);
   p.set("sppf", showSppf ? "1" : "");
   p.set("all", showAlltrees ? "1" : "");
+  p.set("ranges", showRanges ? "1" : "");
   window.history.replaceState({}, "", u);
 }
 
@@ -143,3 +150,4 @@ grammar?.addEventListener("keyup", () => process());
 text.addEventListener("keyup", () => process());
 allTrees.addEventListener("change", () => process());
 sppf.addEventListener("change", () => process());
+ranges.addEventListener("change", () => process());
