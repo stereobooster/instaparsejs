@@ -224,7 +224,8 @@ const model = monaco.editor.createModel(value, "bnf", uri);
 // https://github.com/microsoft/monaco-editor/tree/main/src/basic-languages
 // https://github.com/Engelberg/instaparse?tab=readme-ov-file#notation
 monaco.languages.setMonarchTokensProvider("bnf", {
-  operators: ["*", "?", "=", ":", ":=", "::=", "|"],
+  keywords: ["ε", "eps", "EPSILON", "epsilon", "Epsilon"],
+  operators: ["*", "?", "=", ":", ":=", "::=", "|", "!", "&", "/"],
 
   // we include these common regular expressions
   symbols: /[=><!~?:&|+\-*\/\^%]+/,
@@ -237,13 +238,21 @@ monaco.languages.setMonarchTokensProvider("bnf", {
   tokenizer: {
     root: [
       // identifiers and keywords
-      [/[a-zA-Z_$][\w$]*/, "variable"],
+      [
+        /[A-Za-z_$][\w$]*/,
+        {
+          cases: {
+            "@keywords": "keyword",
+            "@default": "variable",
+          },
+        },
+      ],
 
       // whitespace
       { include: "@whitespace" },
 
       // delimiters and operators
-      [/;/, "delimiter"],
+      [/[;.]/, "delimiter"],
       [/[{}()\[\]<>]/, "@brackets"],
       [/@symbols/, { cases: { "@operators": "operator", "@default": "" } }],
 
