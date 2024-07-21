@@ -1,16 +1,17 @@
 import { type Tree } from "instaparse";
+import { memoizeOne } from "./memoizeOne";
 
 type Node = {
-  // id: string,
+  // either tag or value
   label: string;
-  pos?: [number, number];
   // In the visualizations symbol nodes are shown as rectangles with rounded corners,
   // packed nodes are shown as circles, or ovals when the label is visualized,
   // and intermediate nodes are shown as rectangles.
   type: "symbol" | "packed" | "intermediate";
+  pos?: [number, number];
 };
 
-export function treeToSppfDot(trees: Tree[], showRanges = false) {
+function _treeToSppfDotRec(trees: Tree[]) {
   const nodes = new Map<string, Node>();
   const edges = new Map<string, string>();
 
@@ -52,17 +53,13 @@ export function treeToSppfDot(trees: Tree[], showRanges = false) {
 
       if (tree.children.length === 1 && "value" in tree.children[0]) {
         nodes.set(id, {
-          label: `${tree.children[0].value}${
-            showRanges ? ` (${tree.pos[0]}, ${tree.pos[1]})` : ""
-          }`,
+          label: tree.children[0].value,
           type: "symbol",
           pos: tree.pos,
         });
       } else {
         nodes.set(id, {
-          label: `${tree.tag}${
-            showRanges ? ` (${tree.pos[0]}, ${tree.pos[1]})` : ""
-          }`,
+          label: tree.tag,
           type: "intermediate",
           pos: tree.pos,
         });
@@ -72,12 +69,22 @@ export function treeToSppfDot(trees: Tree[], showRanges = false) {
   }
 
   trees.forEach((tree, i) => rec(tree, i));
+
+  return { nodes, edges };
+}
+
+const treeToSppfDotRec = memoizeOne(_treeToSppfDotRec);
+
+export function treeToSppfDot(trees: Tree[], showRanges = false) {
+  const { nodes, edges } = treeToSppfDotRec(trees);
   return `
   digraph AST {
     ${Array.from(nodes.entries())
       .map(
-        ([id, { label, type }]) =>
-          `${id}[label="${label}" ${
+        ([id, { label, type, pos }]) =>
+          `${id}[label="${label}${
+            showRanges && pos ? ` (${pos[0]}, ${pos[1]})` : ""
+          }" ${
             type === "symbol"
               ? "shape=rect style=rounded"
               : type === "intermediate"

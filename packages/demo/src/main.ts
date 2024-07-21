@@ -5,7 +5,11 @@ import { PanZoomUi } from "@beoe/pan-zoom";
 import { renderDot } from "./renderDot";
 import { treeToDot, treeToSppfDot } from "./treeToDot";
 
-const parserPosAll = memoizeOne(_parserPosAll);
+const parserPosAll = memoizeOne((grammar: string) => {
+  const parser = _parserPosAll(grammar);
+  return memoizeOne((text: string) => parser(text));
+});
+
 const result = document.querySelector("#result")!;
 const grammar = document.querySelector(
   "#grammar"
