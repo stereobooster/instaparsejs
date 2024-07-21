@@ -4,10 +4,14 @@
 
 html,
 body,
-#result {
+.height100p {
   min-height: 100% !important;
   height: 100%;
 }
+
+/* #result {
+  max-height: 100dvh;
+} */
 
 .beoe {
   /* for vertical allignment */
