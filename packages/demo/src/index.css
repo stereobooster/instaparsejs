@@ -9,9 +9,13 @@ body,
   height: 100%;
 }
 
-/* #result {
-  max-height: 100dvh;
-} */
+#result {
+  max-height: calc(100dvh - 2rem);
+}
+
+#result svg {
+  max-height: 100%;
+}
 
 .beoe {
   /* for vertical allignment */

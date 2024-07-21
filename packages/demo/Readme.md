@@ -6,7 +6,6 @@
 - [ ] embeddable version
   - show / hide configuration panel
   - do not use monaco?
-- [ ] make tree always fit by height
 - [x] editor with EBNF highlighting
   - https://langium.org/docs/learn/minilogo/langium_and_monaco/
   - https://shiki.matsu.io/packages/monaco
