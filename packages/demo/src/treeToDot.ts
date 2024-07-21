@@ -1,5 +1,5 @@
 import { type Tree } from "instaparse";
-import { memoizeOne } from "./memoizeOne";
+import memoize from "micro-memoize";
 
 type Node = {
   // either tag or value
@@ -99,7 +99,7 @@ function _treeToSppfDotRec(trees: Tree[]) {
   return { nodes, edges, treeNodes, treeEdges };
 }
 
-const treeToSppfDotRec = memoizeOne(_treeToSppfDotRec);
+const treeToSppfDotRec = memoize(_treeToSppfDotRec, { maxSize: 5 });
 
 export function treeToSppfDot(
   trees: Tree[],
@@ -126,9 +126,7 @@ export function treeToSppfDot(
     )
     .join("\n")}
   ${Array.from(edges.values())
-    .map(
-      (e) => `${e}${treeEdges.get(e)?.has(highlight) ? "[color=red]" : ""}`
-    )
+    .map((e) => `${e}${treeEdges.get(e)?.has(highlight) ? "[color=red]" : ""}`)
     .join("\n")}
 }`;
 }
@@ -186,7 +184,7 @@ function _treeToDotRec(trees: Tree[]) {
   return { nodes, edges, treeNodes, treeEdges };
 }
 
-const treeToDotRec = memoizeOne(_treeToDotRec);
+const treeToDotRec = memoize(_treeToDotRec, { maxSize: 5 });
 
 export function treeToDot(trees: Tree[], showRanges: boolean, highlight = -1) {
   const { nodes, edges, treeNodes, treeEdges } = treeToDotRec(trees);
@@ -209,9 +207,7 @@ export function treeToDot(trees: Tree[], showRanges: boolean, highlight = -1) {
     )
     .join("\n")}
   ${edges
-    .map(
-      (e) => `${e}${treeEdges.get(e)?.has(highlight) ? "[color=red]" : ""}`
-    )
+    .map((e) => `${e}${treeEdges.get(e)?.has(highlight) ? "[color=red]" : ""}`)
     .join("\n")}
 }`;
 }

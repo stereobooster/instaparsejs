@@ -1,6 +1,6 @@
 import { Graphviz } from "@hpcc-js/wasm";
 import { optimize, type Config as SvgoConfig } from "svgo";
-import { memoizeOne } from "./memoizeOne";
+import memoize from "micro-memoize";
 
 const graphviz = await Graphviz.load();
 const svgoConfig: SvgoConfig = {
@@ -21,4 +21,4 @@ function _renderDot(dot: string) {
   return optimize(graphviz.dot(dot), svgoConfig).data;
 }
 
-export const renderDot = memoizeOne(_renderDot);
+export const renderDot = memoize(_renderDot, { maxSize: 10 });
