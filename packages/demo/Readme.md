@@ -14,6 +14,10 @@
   - https://github.com/vallentin/vscode-bnf/blob/master/syntaxes/bnf.tmLanguage.json
   - maybe codemirror is lighter?
 - [ ] dropdown with predefined examples (less priority if we can put config in URL)
+- [ ] maybe use framework
+  - https://docs.solidjs.com/solid-router/reference/primitives/use-search-params
+  - https://park-ui.com/solid/docs/overview/introduction
+  - https://ui.shadcn.com/
 
 For local development use:
 

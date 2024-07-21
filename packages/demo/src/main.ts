@@ -1,154 +1,9 @@
 import "./index.css";
-import { parserPosAll, type Tree } from "instaparse";
-import { Graphviz } from "@hpcc-js/wasm";
-import { optimize, type Config as SvgoConfig } from "svgo";
-
+import { parserPosAll } from "instaparse";
 import "@beoe/pan-zoom/css/PanZoomUi.css";
 import { PanZoomUi } from "@beoe/pan-zoom";
-
-const graphviz = await Graphviz.load();
-const svgoConfig: SvgoConfig = {
-  plugins: [
-    {
-      name: "preset-default",
-      params: {
-        overrides: {
-          // we need viewbox for inline SVGs
-          removeViewBox: false,
-        },
-      },
-    },
-  ],
-};
-function renderDot(dot: string) {
-  return optimize(graphviz.dot(dot), svgoConfig).data;
-}
-
-type Node = {
-  // id: string,
-  label: string;
-  pos?: [number, number];
-  // In the visualizations symbol nodes are shown as rectangles with rounded corners,
-  // packed nodes are shown as circles, or ovals when the label is visualized,
-  // and intermediate nodes are shown as rectangles.
-  type: "symbol" | "packed" | "intermediate";
-};
-
-function treeToSppfDot(trees: Tree[]) {
-  const nodes = new Map<string, Node>();
-  const edges = new Map<string, string>();
-
-  function rec(tree: Tree, prefix: number, parentId?: string, n?: number) {
-    if ("value" in tree) {
-      if (parentId !== undefined) {
-        const id = `${parentId}_${n}`;
-
-        if (!edges.has(`${parentId}->${id}`)) {
-          const packedId = `${parentId}_${prefix}`;
-          edges.set(`${parentId}->${id}`, ``);
-          if (!edges.has(`${parentId}->${packedId}`))
-            edges.set(`${parentId}->${packedId}`, `${parentId}->${packedId}`);
-          edges.set(`${packedId}->${id}`, `${packedId}->${id}`);
-          nodes.set(packedId, {
-            label: ``,
-            type: "packed",
-          });
-        }
-
-        nodes.set(id, { label: tree.value, type: "symbol" });
-      }
-    } else {
-      const id = `${tree.tag}_${tree.pos[0]}_${tree.pos[1]}`;
-
-      if (parentId !== undefined) {
-        if (!edges.has(`${parentId}->${id}`)) {
-          const packedId = `${parentId}_${prefix}`;
-          edges.set(`${parentId}->${id}`, ``);
-          if (!edges.has(`${parentId}->${packedId}`))
-            edges.set(`${parentId}->${packedId}`, `${parentId}->${packedId}`);
-          edges.set(`${packedId}->${id}`, `${packedId}->${id}`);
-          nodes.set(packedId, {
-            label: ``,
-            type: "packed",
-          });
-        }
-      }
-
-      if (tree.children.length === 1 && "value" in tree.children[0]) {
-        nodes.set(id, {
-          label: `${tree.children[0].value} (${tree.pos[0]}, ${tree.pos[1]})`,
-          type: "symbol",
-          pos: tree.pos,
-        });
-      } else {
-        nodes.set(id, {
-          label: `${tree.tag} (${tree.pos[0]}, ${tree.pos[1]})`,
-          type: "intermediate",
-          pos: tree.pos,
-        });
-        tree.children.forEach((t, i) => rec(t, prefix, id, i));
-      }
-    }
-  }
-
-  trees.forEach((tree, i) => rec(tree, i));
-  return `
-digraph AST {
-  ${Array.from(nodes.entries())
-    .map(
-      ([id, { label, type }]) =>
-        `${id}[label="${label}" ${
-          type === "symbol"
-            ? "shape=rect style=rounded"
-            : type === "intermediate"
-            ? "shape=rect"
-            : "shape=point"
-        } ${type !== "packed" ? "height=0.3" : ""}]`
-    )
-    .join("\n")}
-  ${Array.from(edges.values()).join("\n")}
-}`;
-}
-
-function treeToDot(trees: Tree[]) {
-  const nodes = new Map<string, string>();
-  const edges: Array<[string, string]> = [];
-
-  function rec(tree: Tree, prefix: number, parentId?: string, n?: number) {
-    if ("value" in tree) {
-      if (parentId !== undefined && n !== undefined) {
-        const id = `${parentId}_${n}`;
-        nodes.set(id, tree.value);
-        edges.push([parentId, id]);
-      }
-    } else {
-      const id = `${tree.tag}_${prefix}_${tree.pos[0]}_${tree.pos[1]}`;
-      if (parentId !== undefined) edges.push([parentId, id]);
-      if (tree.children.length === 1 && "value" in tree.children[0]) {
-        nodes.set(
-          id,
-          `${tree.children[0].value} (${tree.pos[0]}, ${tree.pos[1]})`
-        );
-      } else {
-        nodes.set(id, `${tree.tag} (${tree.pos[0]}, ${tree.pos[1]})`);
-        tree.children.forEach((t, i) => rec(t, prefix, id, i));
-      }
-    }
-  }
-
-  trees.forEach((tree, i) => rec(tree, i));
-
-  return `
-digraph AST {
-  ${Array.from(nodes.entries())
-    .map(
-      ([id, label]) =>
-        `${id}[label="${label}" shape=rect style=rounded height=0.3]`
-    )
-    .join("\n")}
-  ${edges.map((p) => p.join(` -> `)).join("\n")}
-}`;
-}
+import { renderDot } from "./renderDot";
+import { treeToDot, treeToSppfDot } from "./treeToDot";
 
 const result = document.querySelector("#result")!;
 const grammar = document.querySelector(
@@ -178,7 +33,9 @@ allTrees.checked = Boolean(p.get("all"));
 sppf.checked = Boolean(p.get("sppf"));
 
 import * as monaco from "monaco-editor";
+import { bnfLanguage } from "./bnfLanguage";
 monaco.languages.register({ id: "bnf" });
+monaco.languages.setMonarchTokensProvider("bnf", bnfLanguage);
 
 function validate(model: monaco.editor.ITextModel) {
   const markers = [];
@@ -221,77 +78,8 @@ function validate(model: monaco.editor.ITextModel) {
   monaco.editor.setModelMarkers(model, "owner", markers);
   return markers.length === 0;
 }
-
 const uri = monaco.Uri.parse("inmemory://test");
 const model = monaco.editor.createModel(value, "bnf", uri);
-
-// https://microsoft.github.io/monaco-editor/monarch.html
-// https://microsoft.github.io/monaco-editor/playground.html?source=v0.50.0#example-extending-language-services-model-markers-example
-// https://github.com/microsoft/monaco-editor/tree/main/src/basic-languages
-// https://github.com/Engelberg/instaparse?tab=readme-ov-file#notation
-monaco.languages.setMonarchTokensProvider("bnf", {
-  keywords: ["ε", "eps", "EPSILON", "epsilon", "Epsilon"],
-  operators: ["*", "?", "=", ":", ":=", "::=", "|", "!", "&", "/"],
-
-  // we include these common regular expressions
-  symbols: /[=><!~?:&|+\-*\/\^%]+/,
-
-  // C# style strings
-  escapes:
-    /\\(?:[abfnrtv\\"']|x[0-9A-Fa-f]{1,4}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})/,
-
-  // The main tokenizer for our languages
-  tokenizer: {
-    root: [
-      // identifiers and keywords
-      [
-        /[A-Za-z_$][\w$]*/,
-        {
-          cases: {
-            "@keywords": "keyword",
-            "@default": "variable",
-          },
-        },
-      ],
-
-      // whitespace
-      { include: "@whitespace" },
-
-      // delimiters and operators
-      [/[;.]/, "delimiter"],
-      [/[{}()\[\]<>]/, "@brackets"],
-      [/@symbols/, { cases: { "@operators": "operator", "@default": "" } }],
-
-      // strings
-      [/"([^"\\]|\\.)*$/, "string.invalid"], // non-teminated string
-      [/"/, { token: "string.quote", bracket: "@open", next: "@string" }],
-
-      // characters
-      [/'[^\\']'/, "string"],
-      [/(')(@escapes)(')/, ["string", "string.escape", "string"]],
-      [/'/, "string.invalid"],
-    ],
-
-    comment: [
-      [/[^()*]+/, "comment"],
-      [/\(\*/, "comment", "@push"], // nested comment
-      [/\*\)/, "comment", "@pop"],
-      [/[()*]/, "comment"],
-    ],
-
-    string: [
-      [/[^\\"]+/, "string"],
-      [/@escapes/, "string.escape"],
-      [/\\./, "string.escape.invalid"],
-      [/"/, { token: "string.quote", bracket: "@close", next: "@pop" }],
-    ],
-
-    whitespace: [
-      [/[ \t\r\n]+/, "white"],
-      [/\(\*/, "comment", "@comment"],
-    ],
-  },
-});
 
 const editor = monaco.editor.create(document.getElementById("editor")!, {
   language: "bnf",
