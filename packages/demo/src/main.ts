@@ -22,6 +22,7 @@ const allTreesLabel = document.querySelector("#allTreesLabel")!;
 const sppf = document.querySelector("#sppf")! as HTMLInputElement;
 const ranges = document.querySelector("#ranges")! as HTMLInputElement;
 const highlight = document.querySelector("#highlight")! as HTMLInputElement;
+const download = document.querySelector("#download")! as HTMLButtonElement;
 
 let panZoomInstance: PanZoomUi;
 
@@ -49,6 +50,7 @@ if (highlightTree) {
 import * as monaco from "monaco-editor";
 import { bnfLanguage } from "./bnfLanguage";
 import { memoizeOne } from "./memoizeOne";
+import { downloadString } from "./downloadBlob";
 monaco.languages.register({ id: "bnf" });
 monaco.languages.setMonarchTokensProvider("bnf", bnfLanguage);
 
@@ -186,3 +188,10 @@ allTrees.addEventListener("change", () => process());
 sppf.addEventListener("change", () => process());
 ranges.addEventListener("change", () => process());
 highlight.addEventListener("change", () => process());
+download.addEventListener("click", () =>
+  downloadString(
+    result.firstElementChild?.outerHTML || "",
+    "image/svg+xml",
+    "ast.svg"
+  )
+);

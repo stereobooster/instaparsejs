@@ -1,7 +1,6 @@
 # Playground
 
 - [ ] it seems SPPF has a bug
-- [ ] "download SVG" button
 - [ ] dark mode
 - [ ] maybe use WebWorker for parser (to be able to put timeout)
 - [ ] embeddable version
