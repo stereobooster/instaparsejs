@@ -15,6 +15,7 @@ const svgoConfig: SvgoConfig = {
       },
     },
   ],
+  // datauri: 'enc'
 };
 
 function _renderDot(dot: string) {

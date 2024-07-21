@@ -36,11 +36,7 @@ text.textContent = p.get("t") || "1+2*3+4";
 allTrees.checked = Boolean(p.get("all"));
 sppf.checked = Boolean(p.get("sppf"));
 ranges.checked = Boolean(p.get("ranges"));
-const highlightTree = p.get("highlight") || "";
-if (highlightTree) {
-  highlight.innerHTML = `<option value="">None</option><option value="${highlightTree}">${highlightTree}</option>`;
-  highlight.value = highlightTree;
-}
+highlight.value = p.get("highlight") || "";
 
 import * as monaco from "monaco-editor";
 import { bnfLanguage } from "./bnfLanguage";
@@ -51,7 +47,7 @@ monaco.languages.setMonarchTokensProvider("bnf", bnfLanguage);
 async function validate(model: monaco.editor.ITextModel) {
   const markers = [];
   try {
-    await parseClient(model.getValue(), '');
+    await parseClient(model.getValue(), text.value);
   } catch (e) {
     if (typeof e == "string") {
       const arr = e.split("\n");
@@ -115,12 +111,11 @@ async function process(valid = true) {
 
       // const trees = parserPosAll(grammarValue)(textValue);
       const trees = await parseClient(grammarValue, textValue);
-      highlight.innerHTML =
-        `<option value="">None</option>` +
-        Array.from(Array(trees.length))
-          .map((_, i) => `<option value="${i}">${i}</option>`)
-          .join("\n");
+      highlight.max = String(trees.length - 1)
       highlight.value = isNaN(highlightedTree) ? "" : `${highlightedTree}`;
+
+      if (panZoomInstance) panZoomInstance.off();
+      result.innerHTML = "";
 
       // TODO: why it doesn't show error?
       if (trees.length === 0) {
@@ -147,7 +142,7 @@ async function process(valid = true) {
         allTreesLabel.textContent = `Show all trees (${trees.length})`;
 
         const element = result.firstElementChild;
-        if (panZoomInstance) panZoomInstance.off();
+
         // @ts-expect-error
         panZoomInstance = new PanZoomUi({ element, container: result });
         panZoomInstance.on();

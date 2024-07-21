@@ -1,23 +1,27 @@
 import memoize from "micro-memoize";
+import * as Comlink from "comlink";
 
-const instance = new ComlinkWorker<typeof import("./parseWorker")>(
-  new URL("./parseWorker", import.meta.url),
-  {
-    name: "parseWorker",
-    type: "module",
-  }
-);
+function timeout(t: number) {
+  return new Promise((_resolve, reject) => {
+    setTimeout(() => reject(new Error("Timeout")), t);
+  }) as Promise<never>;
+}
 
-// TODO: is there a way to cancel all previous requests if there is more fresher one
-// https://github.com/GoogleChromeLabs/comlink/issues/372
-// https://github.com/whatwg/dom/issues/948
-// https://vitejs.dev/guide/features.html#web-workers
-// https://developer.mozilla.org/en-US/docs/Web/API/Worker/terminate
 function _parseClient(grammar: string, text: string) {
-  return instance.parseWorker(grammar, text);
+  const worker = new Worker(new URL("./parseWorker.ts", import.meta.url), {
+    type: "module",
+  });
+  const instance = Comlink.wrap<typeof import("./parseWorker.ts")>(worker);
+
+  // in some cases parser can hang,
+  // so as workaround I always terminate previous execution after timeout
+  return Promise.race([
+    timeout(10_000),
+    instance.parseWorker(grammar, text),
+  ]).finally(() => worker.terminate());
 }
 
 export const parseClient = memoize(_parseClient, {
   maxSize: 10,
-  isPromise: true,
+  // isPromise: true,
 });
