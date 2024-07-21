@@ -32,7 +32,7 @@ function _treeToSppfDotRec(trees: Tree[]) {
 
         if (!edges.has(`${parentId}->${id}`)) {
           const packedId = `${parentId}_${prefix}`;
-          edges.set(`${parentId}->${id}`, ``);
+          edges.set(`${parentId}->${id}`, packedId);
           if (!edges.has(`${parentId}->${packedId}`))
             edges.set(`${parentId}->${packedId}`, `${parentId}->${packedId}`);
           edges.set(`${packedId}->${id}`, `${packedId}->${id}`);
@@ -40,6 +40,11 @@ function _treeToSppfDotRec(trees: Tree[]) {
             label: ``,
             type: "packed",
           });
+        } else {
+          const packedId = edges.get(`${parentId}->${id}`)!;
+          addTreeEdge(`${parentId}->${packedId}`, prefix);
+          addTreeEdge(`${packedId}->${id}`, prefix);
+          addTreeNode(packedId, prefix);
         }
 
         nodes.set(id, { label: tree.value, type: "symbol" });

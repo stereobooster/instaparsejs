@@ -1,14 +1,16 @@
 import "./index.css";
-import { parserPosAll as _parserPosAll } from "instaparse";
 import "@beoe/pan-zoom/css/PanZoomUi.css";
 import { PanZoomUi } from "@beoe/pan-zoom";
 import { renderDot } from "./renderDot";
 import { treeToDot, treeToSppfDot } from "./treeToDot";
+import { parse } from "./parserClient";
+// import { parserPosAll as _parserPosAll } from "instaparse";
+// import { memoizeOne } from "./memoizeOne";
 
-const parserPosAll = memoizeOne((grammar: string) => {
-  const parser = _parserPosAll(grammar);
-  return memoizeOne((text: string) => parser(text));
-});
+// const parserPosAll = memoizeOne((grammar: string) => {
+//   const parser = _parserPosAll(grammar);
+//   return memoizeOne((text: string) => parser(text));
+// });
 
 const result = document.querySelector("#result")!;
 const grammar = document.querySelector(
@@ -49,15 +51,14 @@ if (highlightTree) {
 
 import * as monaco from "monaco-editor";
 import { bnfLanguage } from "./bnfLanguage";
-import { memoizeOne } from "./memoizeOne";
 import { downloadString } from "./downloadBlob";
 monaco.languages.register({ id: "bnf" });
 monaco.languages.setMonarchTokensProvider("bnf", bnfLanguage);
 
-function validate(model: monaco.editor.ITextModel) {
+async function validate(model: monaco.editor.ITextModel) {
   const markers = [];
   try {
-    parserPosAll(model.getValue());
+    await parse(model.getValue(), '');
   } catch (e) {
     if (typeof e == "string") {
       const arr = e.split("\n");
@@ -106,7 +107,7 @@ const editor = monaco.editor.create(document.getElementById("editor")!, {
   matchBrackets: "always",
 });
 
-function process(valid = true) {
+async function process(valid = true) {
   const grammarValue = grammar?.value || model.getValue();
   const textValue = text.value;
   const showSppf = sppf.checked;
@@ -119,7 +120,8 @@ function process(valid = true) {
       error.classList.add("hidden");
       allTreesLabel.textContent = `Show all trees`;
 
-      const trees = parserPosAll(grammarValue)(textValue);
+      // const trees = parserPosAll(grammarValue)(textValue);
+      const trees = await parse(grammarValue, textValue);
       highlight.innerHTML =
         `<option value="">None</option>` +
         Array.from(Array(trees.length))
@@ -176,9 +178,9 @@ function process(valid = true) {
   window.history.replaceState({}, "", u);
 }
 
-process(validate(model));
-editor.onDidChangeModelContent(() => {
-  process(validate(model));
+process(await validate(model));
+editor.onDidChangeModelContent(async () => {
+  process(await validate(model));
 });
 
 // process();
