@@ -21,6 +21,7 @@ const allTrees = document.querySelector("#allTrees")! as HTMLInputElement;
 const allTreesLabel = document.querySelector("#allTreesLabel")!;
 const sppf = document.querySelector("#sppf")! as HTMLInputElement;
 const ranges = document.querySelector("#ranges")! as HTMLInputElement;
+const highlight = document.querySelector("#highlight")! as HTMLInputElement;
 
 let panZoomInstance: PanZoomUi;
 
@@ -39,6 +40,11 @@ text.textContent = p.get("t") || "1+2*3+4";
 allTrees.checked = Boolean(p.get("all"));
 sppf.checked = Boolean(p.get("sppf"));
 ranges.checked = Boolean(p.get("ranges"));
+const highlightTree = p.get("highlight") || "";
+if (highlightTree) {
+  highlight.innerHTML = `<option value="">None</option><option value="${highlightTree}">${highlightTree}</option>`;
+  highlight.value = highlightTree;
+}
 
 import * as monaco from "monaco-editor";
 import { bnfLanguage } from "./bnfLanguage";
@@ -104,6 +110,7 @@ function process(valid = true) {
   const showSppf = sppf.checked;
   const showAlltrees = allTrees.checked;
   const showRanges = ranges.checked;
+  const highlightedTree = parseFloat(highlight.value);
 
   if (valid) {
     try {
@@ -111,6 +118,13 @@ function process(valid = true) {
       allTreesLabel.textContent = `Show all trees`;
 
       const trees = parserPosAll(grammarValue)(textValue);
+      highlight.innerHTML =
+        `<option value="">None</option>` +
+        Array.from(Array(trees.length))
+          .map((_, i) => `<option value="${i}">${i}</option>`)
+          .join("\n");
+      highlight.value = isNaN(highlightedTree) ? "" : `${highlightedTree}`;
+
       // TODO: why it doesn't show error?
       if (trees.length === 0) {
         error.classList.remove("hidden");
@@ -118,10 +132,23 @@ function process(valid = true) {
       } else {
         result.innerHTML = renderDot(
           showSppf
-            ? treeToSppfDot(showAlltrees ? trees : [trees[0]], showRanges)
-            : treeToDot(showAlltrees ? trees : [trees[0]], showRanges)
+            ? treeToSppfDot(
+                showAlltrees
+                  ? trees
+                  : [trees[isNaN(highlightedTree) ? 0 : highlightedTree]],
+                showRanges,
+                showAlltrees ? highlightedTree : -1
+              )
+            : treeToDot(
+                showAlltrees
+                  ? trees
+                  : [trees[isNaN(highlightedTree) ? 0 : highlightedTree]],
+                showRanges,
+                showAlltrees ? highlightedTree : -1
+              )
         );
         allTreesLabel.textContent = `Show all trees (${trees.length})`;
+
         const element = result.firstElementChild;
         if (panZoomInstance) panZoomInstance.off();
         // @ts-expect-error
@@ -143,6 +170,7 @@ function process(valid = true) {
   p.set("sppf", showSppf ? "1" : "");
   p.set("all", showAlltrees ? "1" : "");
   p.set("ranges", showRanges ? "1" : "");
+  p.set("highlight", isNaN(highlightedTree) ? "" : `${highlightedTree}`);
   window.history.replaceState({}, "", u);
 }
 
@@ -157,3 +185,4 @@ text.addEventListener("keyup", () => process());
 allTrees.addEventListener("change", () => process());
 sppf.addEventListener("change", () => process());
 ranges.addEventListener("change", () => process());
+highlight.addEventListener("change", () => process());

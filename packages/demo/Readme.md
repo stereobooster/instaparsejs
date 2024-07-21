@@ -1,8 +1,9 @@
 # Playground
 
+- [ ] it seems SPPF has a bug
 - [ ] "download SVG" button
-- [ ] add ability to select one tree to show or highlight
 - [ ] dark mode
+- [ ] maybe use WebWorker for parser (to be able to put timeout)
 - [ ] embeddable version
   - show / hide configuration panel
   - do not use monaco?
