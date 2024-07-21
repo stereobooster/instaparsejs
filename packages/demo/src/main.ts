@@ -1,10 +1,11 @@
 import "./index.css";
-import { parserPosAll } from "instaparse";
+import { parserPosAll as _parserPosAll } from "instaparse";
 import "@beoe/pan-zoom/css/PanZoomUi.css";
 import { PanZoomUi } from "@beoe/pan-zoom";
 import { renderDot } from "./renderDot";
 import { treeToDot, treeToSppfDot } from "./treeToDot";
 
+const parserPosAll = memoizeOne(_parserPosAll);
 const result = document.querySelector("#result")!;
 const grammar = document.querySelector(
   "#grammar"
@@ -37,6 +38,7 @@ ranges.checked = Boolean(p.get("ranges"));
 
 import * as monaco from "monaco-editor";
 import { bnfLanguage } from "./bnfLanguage";
+import { memoizeOne } from "./memoizeOne";
 monaco.languages.register({ id: "bnf" });
 monaco.languages.setMonarchTokensProvider("bnf", bnfLanguage);
 
