@@ -1,7 +1,7 @@
 {
   "name": "instaparse",
   "description": "What if context-free grammars were as easy to use as regular expressions?. Clojure instaparse compiled to ESM",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/stereobooster/instaparsejs.git",
@@ -15,15 +15,16 @@
   ],
   "type": "module",
   "files": [
+    "./index.js",
     "./dist/main.js",
     "./instaparse.d.ts"
   ],
   "exports": {
-    "default": "./dist/main.js",
+    "default": "./index.js",
     "types": "./instaparse.d.ts"
   },
-  "main": "./dist/main.js",
-  "module": "./dist/main.js",
+  "main": "./index.js",
+  "module": "./index.js",
   "types": "./instaparse.d.ts",
   "devDependencies": {
     "shadow-cljs": "2.28.10"
