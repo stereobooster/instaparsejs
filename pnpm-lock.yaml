@@ -23,15 +23,12 @@ importers:
       '@hpcc-js/wasm':
         specifier: ^2.18.0
         version: 2.18.0
-      '@tailwindcss/forms':
-        specifier: ^0.5.7
-        version: 0.5.7(tailwindcss@3.4.6)
       comlink:
         specifier: ^4.4.1
         version: 4.4.1
       instaparse:
-        specifier: 0.0.2
-        version: 0.0.2
+        specifier: 0.0.3
+        version: 0.0.3
       micro-memoize:
         specifier: ^4.1.2
         version: 4.1.2
@@ -42,6 +39,9 @@ importers:
         specifier: ^3.3.2
         version: 3.3.2
     devDependencies:
+      '@tailwindcss/forms':
+        specifier: ^0.5.7
+        version: 0.5.7(tailwindcss@3.4.6)
       '@tailwindcss/typography':
         specifier: ^0.5.10
         version: 0.5.13(tailwindcss@3.4.6)
@@ -803,8 +803,8 @@ packages:
   inherits@2.0.4:
     resolution: {integrity: sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==}
 
-  instaparse@0.0.2:
-    resolution: {integrity: sha512-xkZADKaNGIcOWpW15v+xX6Wj6+4uREFSWDE2u5Q/FNmkPN+l+IcO7ZKW4NF3/g1zscBRYyJdE85mV9Fy51YDoA==}
+  instaparse@0.0.3:
+    resolution: {integrity: sha512-6ZZGsEM+sr2Vg1nBb8QrR25AEYyihiNlgsWzSOwzrJ+7ilOy7dCfeszH+RUCX5b5Qw9ItYBNwk8HGFFDhbm5CA==}
 
   is-binary-path@2.1.0:
     resolution: {integrity: sha512-ZMERYes6pDydyuGidse7OsHxtbI7WVeUEozgR/g7rd0xUimYNlvZRE/K2MgZTjWy725IfelLeVcEM97mmtRGXw==}
@@ -2252,7 +2252,7 @@ snapshots:
 
   inherits@2.0.4: {}
 
-  instaparse@0.0.2: {}
+  instaparse@0.0.3: {}
 
   is-binary-path@2.1.0:
     dependencies:
