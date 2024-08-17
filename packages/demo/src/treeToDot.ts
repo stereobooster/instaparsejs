@@ -56,7 +56,7 @@ function _treeToSppfDotRec(trees: Tree[]) {
       addTreeEdge(`${id}->${packedId}`, prefix);
       edges.set(`${id}->${packedId}`, `${id}->${packedId}`);
 
-      tree.children.forEach((t, i) => rec(t, prefix, packedId));
+      tree.children.forEach((t) => rec(t, prefix, packedId));
     }
   }
 
