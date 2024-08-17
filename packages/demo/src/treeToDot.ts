@@ -8,46 +8,8 @@ type Node = {
   // packed nodes are shown as circles, or ovals when the label is visualized,
   // and intermediate nodes are shown as rectangles.
   type: "symbol" | "packed" | "intermediate";
-  pos?: [number | null, number | null];
+  pos?: [number, number];
 };
-
-function addMissingPos(tree: Tree, n?: number, siblings?: Tree[]): number {
-  if ("value" in tree) {
-    if (n !== undefined && siblings !== undefined) {
-      console.log(n, tree.value);
-      let start: number | null = null;
-      let end: number | null = null;
-      const prev = siblings[n - 1];
-      const next = siblings[n + 1];
-
-      if (prev && "pos" in prev && prev.pos) start = prev.pos[1];
-      if (next && "pos" in next && next.pos) end = next.pos[0];
-      if (start === null && end !== null) start = end - [...tree.value].length;
-      if (start !== null && end === null) end = start + [...tree.value].length;
-
-      // @ts-ignore
-      tree.pos = [start, end];
-      if (start === null || end === null) return 0;
-    }
-  } else {
-    if (tree.children.length === 1 && "value" in tree.children[0]) {
-      // @ts-ignore
-      tree.children[0].pos = tree.pos;
-    } else {
-      const checkLength = tree.children
-        .map((x, i) => addMissingPos(x, i, tree.children))
-        .reduce((x, y) => x + y, 0);
-      if (checkLength !== tree.children.length) {
-        [...tree.children]
-          .reverse()
-          .forEach((x, i) =>
-            addMissingPos(x, tree.children.length - i - 1, tree.children)
-          );
-      }
-    }
-  }
-  return 1;
-}
 
 function _treeToSppfDotRec(trees: Tree[]) {
   const nodes = new Map<string, Node>();
@@ -63,68 +25,41 @@ function _treeToSppfDotRec(trees: Tree[]) {
     treeEdges.get(id)?.add(prefix);
   };
 
-  function rec(tree: Tree, prefix: number, parentId?: string, n?: number) {
-    if ("value" in tree) {
-      if (parentId !== undefined) {
-        // @ts-ignore
-        const id = `___${tree.pos[0]}_${tree.pos[1]}` || `${parentId}_${n}`;
+  function rec(tree: Tree, prefix: number, parentId?: string) {
+    const id = `${tree.tag}_${tree.pos[0]}_${tree.pos[1]}`;
 
-        addTreeEdge(`${parentId}->${id}`, prefix);
-        edges.set(`${parentId}->${id}`, `${parentId}->${id}`);
+    nodes.set(id, {
+      // label:
+      //   tree.value !== undefined ? `${tree.tag} [${tree.value}]` : tree.tag,
+      label: tree.value !== undefined ? tree.value : tree.tag,
+      type: tree.value !== undefined ? "symbol" : "intermediate",
+      pos: tree.pos,
+    });
+    addTreeNode(id, prefix);
 
-        nodes.set(id, {
-          label: tree.value,
-          type: "symbol",
-          // @ts-ignore
-          pos: tree.pos,
-        });
-        addTreeNode(id, prefix);
-      }
-    } else {
-      const id = `${tree.tag}_${tree.pos[0]}_${tree.pos[1]}`;
+    if (parentId !== undefined) {
+      addTreeEdge(`${parentId}->${id}`, prefix);
+      edges.set(`${parentId}->${id}`, `${parentId}->${id}`);
+    }
+
+    if (tree.children !== undefined) {
       const packedId =
-        "__" +
-        tree.children
-          .map(
-            (x) =>
-              // @ts-ignore
-              `${x.tag || ""}_${x.pos[0]}_${x.pos[1]}`
-          )
-          .join("_");
+        "_" +
+        tree.children.map((x) => `${x.tag}_${x.pos[0]}_${x.pos[1]}`).join("_");
 
-      if (parentId !== undefined) {
-        addTreeEdge(`${parentId}->${id}`, prefix);
-        edges.set(`${parentId}->${id}`, `${parentId}->${id}`);
-      }
+      nodes.set(packedId, {
+        label: ``,
+        type: "packed",
+      });
+      addTreeNode(packedId, prefix);
 
-      if (tree.children.length === 1 && "value" in tree.children[0]) {
-        nodes.set(id, {
-          label: tree.children[0].value,
-          type: "symbol",
-          pos: tree.pos,
-        });
-      } else {
-        nodes.set(packedId, {
-          label: ``,
-          type: "packed",
-        });
-        addTreeNode(packedId, prefix);
+      addTreeEdge(`${id}->${packedId}`, prefix);
+      edges.set(`${id}->${packedId}`, `${id}->${packedId}`);
 
-        addTreeEdge(`${id}->${packedId}`, prefix);
-        edges.set(`${id}->${packedId}`, `${id}->${packedId}`);
-
-        nodes.set(id, {
-          label: tree.tag,
-          type: "intermediate",
-          pos: tree.pos,
-        });
-        tree.children.forEach((t, i) => rec(t, prefix, packedId, i));
-      }
-      addTreeNode(id, prefix);
+      tree.children.forEach((t, i) => rec(t, prefix, packedId));
     }
   }
 
-  trees.forEach((tree) => addMissingPos(tree));
   trees.forEach((tree, i) => rec(tree, i));
 
   return { nodes, edges, treeNodes, treeEdges };
@@ -176,46 +111,27 @@ function _treeToDotRec(trees: Tree[]) {
     treeEdges.get(id)?.add(prefix);
   };
 
-  function rec(tree: Tree, prefix: number, parentId?: string, n?: number) {
-    if ("value" in tree) {
-      if (parentId !== undefined && n !== undefined) {
-        const id = `${parentId}_${n}`;
-        nodes.set(id, {
-          label: tree.value,
-          type: "symbol",
-          // @ts-ignore
-          pos: tree.pos,
-        });
-        edges.push(`${parentId}->${id}`);
-        addTreeNode(id, prefix);
-        addTreeEdge(`${parentId}->${id}`, prefix);
-      }
-    } else {
-      const id = `${tree.tag}_${prefix}_${tree.pos[0]}_${tree.pos[1]}`;
-      if (parentId !== undefined) {
-        edges.push(`${parentId}->${id}`);
-        addTreeEdge(`${parentId}->${id}`, prefix);
-      }
+  function rec(tree: Tree, prefix: number, parentId?: string) {
+    const id = `${tree.tag}_${prefix}_${tree.pos[0]}_${tree.pos[1]}`;
 
-      if (tree.children.length === 1 && "value" in tree.children[0]) {
-        nodes.set(id, {
-          label: tree.children[0].value,
-          type: "symbol",
-          pos: tree.pos,
-        });
-      } else {
-        nodes.set(id, {
-          label: tree.tag,
-          type: "intermediate",
-          pos: tree.pos,
-        });
-        tree.children.forEach((t, i) => rec(t, prefix, id, i));
-      }
-      addTreeNode(id, prefix);
+    nodes.set(id, {
+      // label:
+      //   tree.value !== undefined ? `${tree.tag} [${tree.value}]` : tree.tag,
+      label: tree.value !== undefined ? tree.value : tree.tag,
+      type: tree.value !== undefined ? "symbol" : "intermediate",
+      pos: tree.pos,
+    });
+    addTreeNode(id, prefix);
+
+    if (parentId !== undefined) {
+      edges.push(`${parentId}->${id}`);
+      addTreeEdge(`${parentId}->${id}`, prefix);
     }
+
+    if (tree.children !== undefined)
+      tree.children.forEach((t) => rec(t, prefix, id));
   }
 
-  trees.forEach((tree) => addMissingPos(tree));
   trees.forEach((tree, i) => rec(tree, i));
 
   return { nodes, edges, treeNodes, treeEdges };
