@@ -27,9 +27,9 @@ console.log(parser(grammar)(text));
 ## TODO
 
 - [ ] add tests
+  - for `transformTree`
 - [ ] add benchmark
 - [ ] publish `instaparsejs` package as well?
-- [ ] single node with value case
 - [ ] how to show error if parsing failed?
 - [ ] expose `insta/add-line-and-column-info-to-metadata`
 - [ ] expose options for `insta/parser`
